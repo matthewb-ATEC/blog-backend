@@ -1,4 +1,5 @@
 const blogsRouter = require('express').Router()
+const { tokenExtractor } = require('../util/middleware')
 
 const { Blog, User } = require('../models')
 
@@ -8,20 +9,6 @@ const blogFinder = async (req, res, next) => {
     return res.status(404).json({ error: 'Blog not found' })
   }
   req.blog = blog
-  next()
-}
-
-const tokenExtractor = (req, res, next) => {
-  const authorization = req.get('authorization')
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    try {
-      req.decodedToken = jwt.verify(authorization.substring(7), SECRET)
-    } catch {
-      return res.status(401).json({ error: 'token invalid' })
-    }
-  } else {
-    return res.status(401).json({ error: 'token missing' })
-  }
   next()
 }
 
@@ -37,10 +24,9 @@ blogsRouter.get('/', async (req, res) => {
 })
 
 blogsRouter.post('/', tokenExtractor, async (req, res) => {
-  const user = await User.findByPk(req.decodedToken.id)
   const blog = await Blog.create({
     ...req.body,
-    userId: user.id,
+    userId: req.user.id,
   })
   if (blog) res.status(200).send(blog)
   else res.status(404).end()
