@@ -1,5 +1,6 @@
 const blogsRouter = require('express').Router()
 const { Blog, User } = require('../models')
+const { sequelize } = require('../util/db')
 const { tokenExtractor } = require('../util/middleware')
 const { Op } = require('sequelize')
 
@@ -29,6 +30,7 @@ blogsRouter.get('/', async (req, res) => {
       attributes: ['name'],
     },
     where,
+    order: [[sequelize.col('likes'), 'DESC']],
   })
 
   res.status(200).send(blogs)
