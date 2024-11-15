@@ -39,8 +39,11 @@ blogsRouter.put('/:id', blogFinder, async (req, res) => {
 })
 
 blogsRouter.delete('/:id', blogFinder, async (req, res) => {
-  await Blog.destroy({ where: { id: id } })
-  res.status(204).end()
+  if (req.user.id === req.blog.userId) {
+    await Blog.destroy({ where: { id: req.blog.id } })
+    res.status(204).end()
+  } else
+    res.status(403).send({ error: "You cannot delete another user's blog" })
 })
 
 module.exports = blogsRouter
