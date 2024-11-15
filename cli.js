@@ -23,7 +23,7 @@ Blog.init(
       allowNull: false,
     },
     likes: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
     },
@@ -35,6 +35,8 @@ Blog.init(
     modelName: 'blog',
   }
 )
+
+Blog.sync()
 
 const main = async () => {
   try {
