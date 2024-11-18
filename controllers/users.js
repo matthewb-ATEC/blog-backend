@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const { User, Blog } = require('../models')
+const { User, Blog, Team, UserBlogs } = require('../models')
 const { tokenExtractor } = require('../util/middleware')
 
 const userFinder = async (req, res, next) => {
@@ -13,16 +13,47 @@ const userFinder = async (req, res, next) => {
 
 router.get('/', async (req, res) => {
   const users = await User.findAll({
-    include: {
-      model: Blog,
-      attributes: { exclude: ['userId'] },
-    },
+    include: [
+      {
+        model: Blog,
+        attributes: { exclude: ['userId'] },
+      },
+      {
+        model: Blog,
+        as: 'reading_list',
+        attributes: { exclude: ['userId', 'blogId'] },
+        through: {
+          attributes: [],
+        },
+      },
+    ],
   })
   res.status(200).send(users)
 })
 
 router.get('/:username', userFinder, async (req, res) => {
-  res.status(200).send(req.user)
+  const user = await User.findOne({
+    where: { username: req.user.username },
+    include: [
+      {
+        model: Blog,
+        attributes: { exclude: ['userId'] },
+      },
+      {
+        model: Blog,
+        as: 'reading_list',
+        attributes: { exclude: ['userId', 'blogId'] },
+        /*include: {
+          model: UserBlogs,
+          attributes: { exclude: ['blogId'] },
+        },*/
+        through: {
+          attributes: [],
+        },
+      },
+    ],
+  })
+  res.status(200).send(user)
 })
 
 router.post('/', async (req, res) => {

@@ -1,5 +1,5 @@
 const blogsRouter = require('express').Router()
-const { Blog, User } = require('../models')
+const { Blog, User, UserBlogs } = require('../models')
 const { sequelize } = require('../util/db')
 const { tokenExtractor } = require('../util/middleware')
 const { Op } = require('sequelize')
@@ -25,10 +25,20 @@ blogsRouter.get('/', async (req, res) => {
 
   const blogs = await Blog.findAll({
     attributes: { exclude: ['userId'] },
-    include: {
-      model: User,
-      attributes: ['name'],
-    },
+    include: [
+      {
+        model: User,
+        attributes: ['name'],
+      },
+      {
+        model: User,
+        as: 'users_reading',
+        attributes: { exclude: ['userId', 'blogId'] },
+        through: {
+          attributes: [],
+        },
+      },
+    ],
     where,
     order: [[sequelize.col('likes'), 'DESC']],
   })
