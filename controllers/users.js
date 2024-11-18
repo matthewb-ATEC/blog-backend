@@ -43,12 +43,8 @@ router.get('/:username', userFinder, async (req, res) => {
         model: Blog,
         as: 'reading_list',
         attributes: { exclude: ['userId', 'blogId'] },
-        /*include: {
-          model: UserBlogs,
-          attributes: { exclude: ['blogId'] },
-        },*/
         through: {
-          attributes: [],
+          attributes: ['id', 'read'],
         },
       },
     ],
