@@ -1,10 +1,10 @@
 const jwt = require('jsonwebtoken')
-const router = require('express').Router()
+const loginRouter = require('express').Router()
 
 const { SECRET } = require('../util/config')
 const User = require('../models/user')
 
-router.post('/', async (request, response) => {
+loginRouter.post('/', async (request, response) => {
   const body = request.body
 
   const user = await User.findOne({
@@ -21,6 +21,12 @@ router.post('/', async (request, response) => {
     })
   }
 
+  if (user.disabled) {
+    return response.status(401).json({
+      error: 'account disabled, please contact admin',
+    })
+  }
+
   const userForToken = {
     username: user.username,
     id: user.id,
@@ -31,4 +37,4 @@ router.post('/', async (request, response) => {
   response.status(200).send({ token, username: user.username, name: user.name })
 })
 
-module.exports = router
+module.exports = loginRouter
