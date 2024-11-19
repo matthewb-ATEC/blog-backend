@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const { User, Blog, Team, UserBlogs } = require('../models')
+const { User, Blog, Team, UserBlogs, Session } = require('../models')
 const { tokenExtractor } = require('../util/middleware')
 
 const userFinder = async (req, res, next) => {
@@ -88,6 +88,11 @@ router.put('/:username/disabled', tokenExtractor, isAdmin, async (req, res) => {
   if (user) {
     user.disabled = req.body.disabled
     await user.save()
+
+    if (req.body.disabled) {
+      await Session.destroy({ where: { userId: req.user.id } })
+    }
+
     res.json(user)
   } else {
     res.status(404).end()
